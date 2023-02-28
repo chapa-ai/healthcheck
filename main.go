@@ -15,7 +15,7 @@ func main() {
 	logger := logrus.WithFields(logrus.Fields{})
 	logger.Info("program started")
 
-	err := configs.InitConfig("/pkg/configs/appConfigs.env")
+	err := configs.InitConfig("/configs/appConfigs.env")
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func main() {
 	}
 	logger.Info("migrations implemented")
 
-	configurations, err := configs.ReadUrlConfigs("/pkg/configs/configs.json")
+	configurations, err := configs.ReadUrlConfigs("/configs/configs.json")
 	if err != nil {
 		logrus.Errorf("failed read configs: %s", err)
 		return

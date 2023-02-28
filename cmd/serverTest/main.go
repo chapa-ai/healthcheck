@@ -11,19 +11,28 @@ import (
 )
 
 func main() {
-	err := configs.InitConfig("/../../pkg/configs/appConfigs.env")
+	err := configs.InitConfig("/../../configs/appConfigs.env")
 	if err != nil {
+		logrus.Error("couldn't get configs")
 		panic(err)
 	}
 
 	d, err := db.GetDB()
 	if err != nil {
 		logrus.Error("couldn't instantiate db")
+		return
 	}
-	defer d.Close()
+	defer func() {
+		err = d.Close()
+		if err != nil {
+			logrus.Errorf("failed closing conn of db: %s", err)
+			return
+		}
+	}()
 
 	err = db.MigrateDb("../../migrations")
 	if err != nil {
+		logrus.Errorf("failed MigrateDb: %s", err)
 		panic(err)
 	}
 	logrus.Info("migrations implemented")

@@ -79,6 +79,7 @@ func SendResultsOfChecksToDb(ctx context.Context, connDb *sql.DB, results *model
 	res, err := SelectResultsInDB(ctx, connDb, results)
 	if err != nil {
 		logrus.Errorf("failed SelectResultsInDB: %s", err)
+		return "", "", err
 	}
 
 	stmt := `INSERT INTO results ("url", "statuscode", "text") VALUES ($1, $2, $3) ON CONFLICT(url)

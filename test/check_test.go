@@ -17,7 +17,7 @@ var (
 
 func TestDoChecksWithInterval(t *testing.T) {
 
-	err := configs.InitConfig("/../pkg/configs/appConfigs.env")
+	err := configs.InitConfig("/../configs/appConfigs.env")
 	if err != nil {
 		t.Fatalf("failed get configs: %s", err)
 	}
@@ -42,7 +42,7 @@ func TestDoChecksWithInterval(t *testing.T) {
 }
 
 func TestCheckForBadRequests(t *testing.T) {
-	err := configs.InitConfig("/../pkg/configs/appConfigs.env")
+	err := configs.InitConfig("/../configs/appConfigs.env")
 	if err != nil {
 		t.Fatalf("failed get configs: %s", err)
 	}
@@ -78,7 +78,7 @@ func TestCheckForBadRequests(t *testing.T) {
 }
 
 func TestSendResultsOfChecksToDb(t *testing.T) {
-	err := configs.InitConfig("/../pkg/configs/appConfigs.env")
+	err := configs.InitConfig("/../configs/appConfigs.env")
 	if err != nil {
 		t.Fatalf("failed get configs: %s", err)
 	}

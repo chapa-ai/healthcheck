@@ -11,6 +11,7 @@ func NotifyHttpBin(url string) (string, error) {
 	jsonData, err := json.Marshal("sent failed url")
 	if err != nil {
 		logrus.Errorf("failed json.Marshal: %s", err)
+		return "", err
 	}
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {

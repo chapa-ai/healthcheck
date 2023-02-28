@@ -13,13 +13,12 @@ import (
 func InitConfig(path string) error {
 	dir, err := os.Getwd()
 	if err != nil {
-		logrus.Errorf("couldn't get mainPath")
+		logrus.Errorf("couldn't get mainPath: %s", err)
 		return nil
 	}
-	/// TODO for Windows
-	err = godotenv.Load(dir + path)
+	err = godotenv.Load(filepath.Join(dir, path))
 	if err != nil {
-		logrus.Errorf("failed godotenv.Load: %v", err)
+		logrus.Errorf("failed godotenv.Load: %s", err)
 		return nil
 	}
 
@@ -27,6 +26,8 @@ func InitConfig(path string) error {
 }
 
 func ReadUrlConfigs(path string) (*models.Configuration, error) {
+	var configs models.Configuration
+	
 	dir, err := os.Getwd()
 	if err != nil {
 		logrus.Errorf("failed os.Getwd: %s", err)
@@ -42,7 +43,6 @@ func ReadUrlConfigs(path string) (*models.Configuration, error) {
 		logrus.Errorf("failed ioutil.ReadAll: %s", err)
 		return nil, err
 	}
-	var configs models.Configuration
 
 	err = json.Unmarshal(byteValue, &configs)
 	if err != nil {

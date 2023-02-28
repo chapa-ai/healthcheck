@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"healthcheck/pkg/models"
 	"net/http"
@@ -11,12 +12,12 @@ func MakeRequest(c echo.Context) error {
 	params := &models.Params{}
 	err := c.Bind(params)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, models.NewErrorResponse(fmt.Sprintf("binding failed: %s", err)))
 	}
 
 	resp, err := http.Post(params.Url, "application/json", nil)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, models.NewErrorResponse(fmt.Sprintf("http.Post failed: %s", err)))
 	}
 
 	text := ""
