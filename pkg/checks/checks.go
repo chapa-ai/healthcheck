@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"database/sql"
 	"github.com/sirupsen/logrus"
 	"healthcheck/pkg/db"
@@ -14,7 +15,7 @@ import (
 )
 
 func DoChecksWithInterval(logger *logrus.Entry, connDb *sql.DB, configurations *models.Configuration) error {
-	// each 20 second we launch our healthcheck
+	// each 90 seconds we launch our healthcheck
 	startTime, err := strconv.ParseInt(os.Getenv("StartTime"), 10, 64)
 	if err != nil {
 		logrus.Errorf("failed strconv.ParseInt: %s", err)
@@ -24,7 +25,7 @@ func DoChecksWithInterval(logger *logrus.Entry, connDb *sql.DB, configurations *
 	for range time.NewTicker(time.Second * time.Duration(startTime)).C {
 		for _, value := range configurations.Configs {
 			logger.Infof("checks url: %s", value.Url)
-			results, err := CheckStatusCodeAndText(connDb, value.Url)
+			results, err := CheckStatusCodeAndText(context.Background(), connDb, value.Url)
 			if err != nil {
 				logrus.Errorf("failed CheckStatusCodeAndText: %s", err)
 				return err
@@ -40,7 +41,7 @@ func DoChecksWithInterval(logger *logrus.Entry, connDb *sql.DB, configurations *
 	return nil
 }
 
-func CheckStatusCodeAndText(connDb *sql.DB, url string) (*models.Response, error) {
+func CheckStatusCodeAndText(ctx context.Context, connDb *sql.DB, url string) (*models.Response, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		logrus.Errorf("failed http.Get: %s", err)
@@ -57,7 +58,7 @@ func CheckStatusCodeAndText(connDb *sql.DB, url string) (*models.Response, error
 		response.Checks = []string{"status_code", "text"}
 	}
 
-	savedResults, updatedResults, err := db.SendResultsOfChecksToDb(connDb, response)
+	savedResults, updatedResults, err := db.SendResultsOfChecksToDb(ctx, connDb, response)
 	if err != nil {
 		logrus.Errorf("failed SendResultsOfChecksToDb: %s", err)
 		return nil, err

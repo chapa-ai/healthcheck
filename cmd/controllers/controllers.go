@@ -9,7 +9,7 @@ import (
 )
 
 func GetFailedChecks(c echo.Context) error {
-	res, err := db.GetFailedChecks()
+	res, err := db.GetFailedChecks(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.NewErrorResponse(fmt.Sprintf("failed GetFailedChecks: %v", err)))
 	}

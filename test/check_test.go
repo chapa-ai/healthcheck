@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"healthcheck/pkg/checks"
@@ -57,7 +58,7 @@ func TestCheckForBadRequests(t *testing.T) {
 	counts := []int{}
 
 	for i := 0; i <= 4; i++ {
-		response, err := checks.CheckStatusCodeAndText(connDb, params.Url)
+		response, err := checks.CheckStatusCodeAndText(context.Background(), connDb, params.Url)
 		if err != nil {
 			t.Fatalf("failed checks.CheckStatusCodeAndText: %s", err)
 		}
@@ -96,12 +97,12 @@ func TestSendResultsOfChecksToDb(t *testing.T) {
 		Text:       "ok",
 	}
 
-	_, updatedResultsWithFail, err := db.SendResultsOfChecksToDb(connDb, resultsWithFail)
+	_, updatedResultsWithFail, err := db.SendResultsOfChecksToDb(context.Background(), connDb, resultsWithFail)
 	if err != nil {
 		t.Fatalf("failed SendResultsOfChecksToDb: %s", err)
 	}
 
-	_, updatedResultsWithOk, err := db.SendResultsOfChecksToDb(connDb, resultsWithOk)
+	_, updatedResultsWithOk, err := db.SendResultsOfChecksToDb(context.Background(), connDb, resultsWithOk)
 	if err != nil {
 		t.Fatalf("failed SendResultsOfChecksToDb: %s", err)
 	}

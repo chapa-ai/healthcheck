@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/DavidHuie/gomigrate"
@@ -63,19 +64,19 @@ func MigrateDb(path string) error {
 	return migrator.Migrate()
 }
 
-func SelectResultsInDB(d *sql.DB, results *models.Response) (*models.Response, error) {
+func SelectResultsInDB(ctx context.Context, d *sql.DB, results *models.Response) (*models.Response, error) {
 	res := &models.Response{}
 
 	sqlStmt := `SELECT url, statuscode, text FROM results WHERE "url"=$1`
-	err := d.QueryRow(sqlStmt, results.Url).Scan(&res.Url, &res.StatusCode, &res.Text)
+	err := d.QueryRowContext(ctx, sqlStmt, results.Url).Scan(&res.Url, &res.StatusCode, &res.Text)
 	if err != nil {
 		logrus.Infof("queryRow: %s", err)
 	}
 	return res, nil
 }
 
-func SendResultsOfChecksToDb(connDb *sql.DB, results *models.Response) (string, string, error) {
-	res, err := SelectResultsInDB(connDb, results)
+func SendResultsOfChecksToDb(ctx context.Context, connDb *sql.DB, results *models.Response) (string, string, error) {
+	res, err := SelectResultsInDB(ctx, connDb, results)
 	if err != nil {
 		logrus.Errorf("failed SelectResultsInDB: %s", err)
 	}
@@ -84,7 +85,7 @@ func SendResultsOfChecksToDb(connDb *sql.DB, results *models.Response) (string, 
 		 DO UPDATE SET "url" = $1, "statuscode" = $2, "text" = $3 RETURNING "url", "statuscode", "text"`
 
 	output := &models.Response{}
-	err = connDb.QueryRow(stmt, results.Url, results.StatusCode, results.Text).Scan(&output.Url, &output.StatusCode, &output.Text)
+	err = connDb.QueryRowContext(ctx, stmt, results.Url, results.StatusCode, results.Text).Scan(&output.Url, &output.StatusCode, &output.Text)
 	if err != nil {
 		logrus.Errorf("failed QueryRow(): %s", err)
 		return "", "", err
@@ -93,9 +94,9 @@ func SendResultsOfChecksToDb(connDb *sql.DB, results *models.Response) (string, 
 	return res.Text, output.Text, nil
 }
 
-func GetFailedChecks() ([]*models.Response, error) {
+func GetFailedChecks(ctx context.Context) ([]*models.Response, error) {
 	sqlStmt := `SELECT url, statuscode, text FROM results WHERE "statuscode" != 200 OR "text" = 'failed'`
-	rows, err := db.Query(sqlStmt)
+	rows, err := db.QueryContext(ctx, sqlStmt)
 	if err != nil {
 		logrus.Errorf("failed db.Query: %s", err)
 		return nil, err
